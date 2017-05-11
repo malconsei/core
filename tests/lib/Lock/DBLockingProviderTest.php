@@ -83,12 +83,11 @@ class DBLockingProviderTest extends LockingProvider {
 
 		$this->currentTime = 150 + 3600;
 
-		$locks = $this->getLockEntries();
-		$this->assertEquals(2, $this->getLockEntryCount(), json_encode($locks));
+		$this->assertLocks(['foo', 'asd', 'bar']);
 
 		$this->instance->cleanExpiredLocks();
 
-		$this->assertEquals(2, $this->getLockEntryCount());
+		$this->assertLocks(['asd', 'bar']);
 	}
 
 	private function getLockEntries() {
@@ -99,9 +98,8 @@ class DBLockingProviderTest extends LockingProvider {
 		return $rows;
 	}
 
-	private function getLockEntryCount() {
-		$query = $this->connection->prepare('SELECT count(*) FROM `*PREFIX*file_locks`');
-		$query->execute();
-		return $query->fetchColumn();
+	protected function assertLocks(array $expected) {
+		$locks = $this->getLockEntries();
+		$this->assertEquals(count($expected), count($locks), json_encode($locks));
 	}
 }
